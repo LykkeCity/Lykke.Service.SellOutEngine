@@ -1,0 +1,24 @@
+SellOutEngineService:
+  Db:
+    DataConnectionString:
+      settings-key: SellOutEngineService-DataConnectionString
+      types:
+      - AzureTableStorage
+
+    LogsConnectionString:
+      settings-key: SellOutEngineService-LogsConnectionString
+      types:
+      - AzureTableStorage
+      
+SlackNotifications:
+  AzureQueue:
+    ConnectionString:
+      settings-key: SlackNotificationsConnString
+      types:
+      - AzureTableStorage
+    QueueName:
+      settings-key: SlackQueueName
+      
+MonitoringServiceClient:
+  MonitoringServiceUrl:
+    settings-key: MonitoringServiceUrl

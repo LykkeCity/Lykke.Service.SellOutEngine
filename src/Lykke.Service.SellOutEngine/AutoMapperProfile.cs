@@ -8,6 +8,7 @@ namespace Lykke.Service.SellOutEngine
     {
         public AutoMapperProfile()
         {
+            
         }
     }
 }

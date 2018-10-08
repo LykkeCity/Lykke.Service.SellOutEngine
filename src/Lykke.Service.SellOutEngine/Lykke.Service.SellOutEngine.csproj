@@ -25,6 +25,7 @@
     <PackageReference Include="Microsoft.AspNetCore.StaticFiles" Version="2.1.1" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\client\Lykke.Service.SellOutEngine.Client\Lykke.Service.SellOutEngine.Client.csproj" />
     <ProjectReference Include="..\Lykke.Service.SellOutEngine.AzureRepositories\Lykke.Service.SellOutEngine.AzureRepositories.csproj" />
     <ProjectReference Include="..\Lykke.Service.SellOutEngine.Domain\Lykke.Service.SellOutEngine.Domain.csproj" />
     <ProjectReference Include="..\Lykke.Service.SellOutEngine.DomainServices\Lykke.Service.SellOutEngine.DomainServices.csproj" />

@@ -1,10 +1,15 @@
+using System;
 using System.Collections.Generic;
 using System.Net;
 using System.Threading.Tasks;
+using AutoMapper;
 using Lykke.Common.Api.Contract.Responses;
 using Lykke.Common.ApiLibrary.Exceptions;
 using Lykke.Service.SellOutEngine.Client.Api;
 using Lykke.Service.SellOutEngine.Client.Models.Instruments;
+using Lykke.Service.SellOutEngine.Domain;
+using Lykke.Service.SellOutEngine.Domain.Exceptions;
+using Lykke.Service.SellOutEngine.Domain.Services;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Lykke.Service.SellOutEngine.Controllers
@@ -12,17 +17,22 @@ namespace Lykke.Service.SellOutEngine.Controllers
     [Route("/api/[controller]")]
     public class InstrumentsController : Controller, IInstrumentsApi
     {
-        public InstrumentsController()
+        private readonly IInstrumentService _instrumentService;
+
+        public InstrumentsController(IInstrumentService instrumentService)
         {
+            _instrumentService = instrumentService;
         }
 
         /// <inheritdoc/>
         /// <response code="200">A collection of instruments.</response>
         [HttpGet]
         [ProducesResponseType(typeof(IReadOnlyCollection<InstrumentModel>), (int) HttpStatusCode.OK)]
-        public Task<IReadOnlyCollection<InstrumentModel>> GetAllAsync()
+        public async Task<IReadOnlyCollection<InstrumentModel>> GetAllAsync()
         {
-            throw new System.NotImplementedException();
+            IReadOnlyCollection<Instrument> instruments = await _instrumentService.GetAllAsync();
+
+            return Mapper.Map<List<InstrumentModel>>(instruments);
         }
 
         /// <inheritdoc/>
@@ -31,9 +41,18 @@ namespace Lykke.Service.SellOutEngine.Controllers
         [HttpGet("{assetPairId}")]
         [ProducesResponseType(typeof(InstrumentModel), (int) HttpStatusCode.OK)]
         [ProducesResponseType(typeof(ErrorResponse), (int) HttpStatusCode.NotFound)]
-        public Task<InstrumentModel> GetByAssetPairAsync(string assetPairId)
+        public async Task<InstrumentModel> GetByAssetPairAsync(string assetPairId)
         {
-            throw new System.NotImplementedException();
+            try
+            {
+                Instrument instrument = await _instrumentService.GetByAssetPairIdAsync(assetPairId);
+
+                return Mapper.Map<InstrumentModel>(instrument);
+            }
+            catch (EntityNotFoundException)
+            {
+                throw new ValidationApiException(HttpStatusCode.NotFound, "Instrument does not exist.");
+            }
         }
 
         /// <inheritdoc/>
@@ -42,12 +61,21 @@ namespace Lykke.Service.SellOutEngine.Controllers
         [HttpPost]
         [ProducesResponseType((int) HttpStatusCode.NoContent)]
         [ProducesResponseType(typeof(ErrorResponse), (int) HttpStatusCode.Conflict)]
-        public Task AddAsync([FromBody] InstrumentModel model, string userId)
+        public async Task AddAsync([FromBody] InstrumentModel model, string userId)
         {
             if (string.IsNullOrEmpty(userId))
                 throw new ValidationApiException("Used id required");
 
-            throw new System.NotImplementedException();
+            try
+            {
+                var instrument = Mapper.Map<Instrument>(model);
+
+                await _instrumentService.AddAsync(instrument, userId);
+            }
+            catch (EntityAlreadyExistsException)
+            {
+                throw new ValidationApiException(HttpStatusCode.Conflict, "Instrument already exists.");
+            }
         }
 
         /// <inheritdoc/>
@@ -56,26 +84,48 @@ namespace Lykke.Service.SellOutEngine.Controllers
         [HttpPut]
         [ProducesResponseType((int) HttpStatusCode.NoContent)]
         [ProducesResponseType(typeof(ErrorResponse), (int) HttpStatusCode.NotFound)]
-        public Task UpdateAsync([FromBody] InstrumentModel model, string userId)
+        public async Task UpdateAsync([FromBody] InstrumentModel model, string userId)
         {
             if (string.IsNullOrEmpty(userId))
                 throw new ValidationApiException("Used id required");
 
-            throw new System.NotImplementedException();
+            try
+            {
+                var instrument = Mapper.Map<Instrument>(model);
+
+                await _instrumentService.UpdateAsync(instrument, userId);
+            }
+            catch (EntityNotFoundException)
+            {
+                throw new ValidationApiException(HttpStatusCode.NotFound, "Instrument does not exist.");
+            }
         }
 
         /// <inheritdoc/>
         /// <response code="204">The instrument successfully deleted.</response>
+        /// <response code="400">Can not delete active instrument.</response>
         /// <response code="404">Instrument does not exist.</response>
         [HttpDelete("{assetPairId}")]
         [ProducesResponseType((int) HttpStatusCode.NoContent)]
         [ProducesResponseType(typeof(ErrorResponse), (int) HttpStatusCode.NotFound)]
-        public Task DeleteAsync(string assetPairId, string userId)
+        [ProducesResponseType(typeof(ErrorResponse), (int) HttpStatusCode.BadRequest)]
+        public async Task DeleteAsync(string assetPairId, string userId)
         {
             if (string.IsNullOrEmpty(userId))
                 throw new ValidationApiException("Used id required");
 
-            throw new System.NotImplementedException();
+            try
+            {
+                await _instrumentService.DeleteAsync(assetPairId, userId);
+            }
+            catch (EntityNotFoundException)
+            {
+                throw new ValidationApiException(HttpStatusCode.NotFound, "Instrument does not exist.");
+            }
+            catch (InvalidOperationException exception)
+            {
+                throw new ValidationApiException(HttpStatusCode.BadRequest, exception.Message);
+            }
         }
     }
 }

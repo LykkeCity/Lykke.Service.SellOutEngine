@@ -60,7 +60,7 @@ namespace Lykke.Service.SellOutEngine.Client.Models.Trades
         /// <summary>
         /// The opposite volume of the trade.
         /// </summary>
-        public decimal OppositeSideVolume { get; set; }
+        public decimal OppositeVolume { get; set; }
 
         /// <summary>
         /// The identifier of the opposite client.

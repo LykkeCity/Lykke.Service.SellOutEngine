@@ -1,5 +1,8 @@
 ﻿using JetBrains.Annotations;
 using Lykke.Sdk.Settings;
+using Lykke.Service.Balances.Client;
+using Lykke.Service.SellOutEngine.Settings.Clients;
+using Lykke.Service.SellOutEngine.Settings.Clients.MatchingEngine;
 using Lykke.Service.SellOutEngine.Settings.ServiceSettings;
 
 namespace Lykke.Service.SellOutEngine.Settings
@@ -8,5 +11,11 @@ namespace Lykke.Service.SellOutEngine.Settings
     public class AppSettings : BaseAppSettings
     {
         public SellOutEngineSettings SellOutEngineService { get; set; }
+
+        public AssetsServiceClientSettings AssetsServiceClient { get; set; }
+
+        public BalancesServiceClientSettings BalancesServiceClient { get; set; }
+
+        public MatchingEngineClientSettings MatchingEngineClient { get; set; }
     }
 }

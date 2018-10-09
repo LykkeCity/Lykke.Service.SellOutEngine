@@ -1,9 +1,11 @@
-using System;
 using System.Collections.Generic;
 using System.Net;
 using System.Threading.Tasks;
+using AutoMapper;
 using Lykke.Service.SellOutEngine.Client.Api;
 using Lykke.Service.SellOutEngine.Client.Models.Balances;
+using Lykke.Service.SellOutEngine.Domain;
+using Lykke.Service.SellOutEngine.Domain.Services;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Lykke.Service.SellOutEngine.Controllers
@@ -11,8 +13,11 @@ namespace Lykke.Service.SellOutEngine.Controllers
     [Route("/api/[controller]")]
     public class BalancesController : Controller, IBalancesApi
     {
-        public BalancesController()
+        private readonly IBalanceService _balanceService;
+
+        public BalancesController(IBalanceService balanceService)
         {
+            _balanceService = balanceService;
         }
 
         /// <inheritdoc/>
@@ -21,7 +26,9 @@ namespace Lykke.Service.SellOutEngine.Controllers
         [ProducesResponseType(typeof(IReadOnlyCollection<BalanceModel>), (int) HttpStatusCode.OK)]
         public async Task<IReadOnlyCollection<BalanceModel>> GetAllAsync()
         {
-            throw new NotImplementedException();
+            IReadOnlyCollection<Balance> balances = await _balanceService.GetAsync();
+
+            return Mapper.Map<BalanceModel[]>(balances);
         }
 
         /// <inheritdoc/>
@@ -30,7 +37,9 @@ namespace Lykke.Service.SellOutEngine.Controllers
         [ProducesResponseType(typeof(BalanceModel), (int) HttpStatusCode.OK)]
         public async Task<BalanceModel> GetByAssetIdAsync(string assetId)
         {
-            throw new NotImplementedException();
+            Balance balance = await _balanceService.GetByAssetIdAsync(assetId);
+
+            return Mapper.Map<BalanceModel>(balance);
         }
     }
 }

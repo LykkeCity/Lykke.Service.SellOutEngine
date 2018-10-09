@@ -1,4 +1,14 @@
 SellOutEngineService:
+  WalletId:
+    settings-key: SellOutEngineService-WalletId
+
+  AssetsCacheExpirationPeriod: 00:10:00
+
+  QuoteSources:
+    settings-key: SellOutEngineService-QuoteSources
+    types:
+    - JsonArray
+
   Db:
     DataConnectionString:
       settings-key: SellOutEngineService-DataConnectionString
@@ -9,7 +19,46 @@ SellOutEngineService:
       settings-key: SellOutEngineService-LogsConnectionString
       types:
       - AzureTableStorage
-      
+
+  Rabbit:
+    Subscribers:
+      LykkeTrades:
+        ConnectionString:
+          settings-key: SellOutEngineService-Rabbit-Subscribers-LykkeTrades-ConnectionString
+          types:
+          - RabbitMq
+        Exchange:
+          settings-key: SellOutEngineService-Rabbit-Subscribers-LykkeTrades-Exchange
+        Queue:
+          settings-key: SellOutEngineService-Rabbit-Subscribers-LykkeTrades-Queue
+
+    Quotes:
+      ConnectionString:
+        settings-key: SellOutEngineService-Rabbit-Subscribers-Quotes-ConnectionString
+        types:
+        - RabbitMq
+      Exchanges:
+        settings-key: SellOutEngineService-Rabbit-Subscribers-Quotes-Exchanges
+        types:
+        - JsonArray
+      Queue:
+        settings-key: SellOutEngineService-Rabbit-Subscribers-Quotes-Queue
+
+AssetsServiceClient:
+  ServiceUrl:
+    settings-key: AssetsServiceUrl
+
+BalancesServiceClient:
+  ServiceUrl:
+    settings-key: BalancesServiceUrl
+
+MatchingEngineClient:
+  IpEndpoint:
+    Port:
+      settings-key: MatchingEngine-Port
+    Host:
+      settings-key: MatchingEngine-Host
+
 SlackNotifications:
   AzureQueue:
     ConnectionString:
@@ -18,7 +67,7 @@ SlackNotifications:
       - AzureTableStorage
     QueueName:
       settings-key: SlackQueueName
-      
+
 MonitoringServiceClient:
   MonitoringServiceUrl:
     settings-key: MonitoringServiceUrl

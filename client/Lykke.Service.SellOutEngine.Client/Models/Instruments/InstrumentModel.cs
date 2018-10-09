@@ -1,4 +1,6 @@
 using JetBrains.Annotations;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Converters;
 
 namespace Lykke.Service.SellOutEngine.Client.Models.Instruments
 {
@@ -41,6 +43,7 @@ namespace Lykke.Service.SellOutEngine.Client.Models.Instruments
         /// <summary>
         /// The mode of the instrument.
         /// </summary>
+        [JsonConverter(typeof(StringEnumConverter))]
         public InstrumentMode Mode { get; set; }
     }
 }

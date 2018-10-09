@@ -10,21 +10,26 @@ namespace Lykke.Service.SellOutEngine.Managers
     public class ShutdownManager : IShutdownManager
     {
         private readonly BalancesTimer _balancesTimer;
+        private readonly MarketMakerTimer _marketMakerTimer;
         private readonly LykkeTradeSubscriber _lykkeTradeSubscriber;
         private readonly QuoteSubscriber[] _quoteSubscribers;
 
         public ShutdownManager(
             BalancesTimer balancesTimer,
+            MarketMakerTimer marketMakerTimer,
             LykkeTradeSubscriber lykkeTradeSubscriber,
             QuoteSubscriber[] quoteSubscribers)
         {
             _balancesTimer = balancesTimer;
+            _marketMakerTimer = marketMakerTimer;
             _lykkeTradeSubscriber = lykkeTradeSubscriber;
             _quoteSubscribers = quoteSubscribers;
         }
 
         public Task StopAsync()
         {
+            _marketMakerTimer.Stop();
+
             _balancesTimer.Stop();
 
             _lykkeTradeSubscriber.Stop();

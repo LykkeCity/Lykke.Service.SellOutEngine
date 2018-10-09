@@ -32,17 +32,17 @@ SellOutEngineService:
         Queue:
           settings-key: SellOutEngineService-Rabbit-Subscribers-LykkeTrades-Queue
 
-    Quotes:
-      ConnectionString:
-        settings-key: SellOutEngineService-Rabbit-Subscribers-Quotes-ConnectionString
-        types:
-        - RabbitMq
-      Exchanges:
-        settings-key: SellOutEngineService-Rabbit-Subscribers-Quotes-Exchanges
-        types:
-        - JsonArray
-      Queue:
-        settings-key: SellOutEngineService-Rabbit-Subscribers-Quotes-Queue
+      Quotes:
+        ConnectionString:
+          settings-key: SellOutEngineService-Rabbit-Subscribers-Quotes-ConnectionString
+          types:
+          - RabbitMq
+        Exchanges:
+          settings-key: SellOutEngineService-Rabbit-Subscribers-Quotes-Exchanges
+          types:
+          - JsonArray
+        Queue:
+          settings-key: SellOutEngineService-Rabbit-Subscribers-Quotes-Queue
 
 AssetsServiceClient:
   ServiceUrl:

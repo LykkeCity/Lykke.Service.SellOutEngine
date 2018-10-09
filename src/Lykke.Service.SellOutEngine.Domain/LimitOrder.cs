@@ -1,3 +1,5 @@
+using System;
+
 namespace Lykke.Service.SellOutEngine.Domain
 {
     /// <summary>
@@ -5,6 +7,18 @@ namespace Lykke.Service.SellOutEngine.Domain
     /// </summary>
     public class LimitOrder
     {
+        public LimitOrder()
+        {
+        }
+
+        public LimitOrder(decimal price, decimal volume, LimitOrderType type)
+        {
+            Id = Guid.NewGuid().ToString("D");
+            Price = price;
+            Volume = volume;
+            Type = type;
+        }
+
         /// <summary>
         /// The identifier of the limit order.
         /// </summary>

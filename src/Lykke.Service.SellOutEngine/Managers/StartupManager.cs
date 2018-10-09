@@ -10,15 +10,18 @@ namespace Lykke.Service.SellOutEngine.Managers
     public class StartupManager : IStartupManager
     {
         private readonly BalancesTimer _balancesTimer;
+        private readonly MarketMakerTimer _marketMakerTimer;
         private readonly LykkeTradeSubscriber _lykkeTradeSubscriber;
         private readonly QuoteSubscriber[] _quoteSubscribers;
 
         public StartupManager(
             BalancesTimer balancesTimer,
+            MarketMakerTimer marketMakerTimer,
             LykkeTradeSubscriber lykkeTradeSubscriber,
             QuoteSubscriber[] quoteSubscribers)
         {
             _balancesTimer = balancesTimer;
+            _marketMakerTimer = marketMakerTimer;
             _lykkeTradeSubscriber = lykkeTradeSubscriber;
             _quoteSubscribers = quoteSubscribers;
         }
@@ -31,6 +34,8 @@ namespace Lykke.Service.SellOutEngine.Managers
 
             foreach (QuoteSubscriber quoteSubscriber in _quoteSubscribers)
                 quoteSubscriber.Start();
+
+            _marketMakerTimer.Start();
 
             return Task.CompletedTask;
         }

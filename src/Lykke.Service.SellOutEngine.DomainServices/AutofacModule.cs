@@ -42,7 +42,7 @@ namespace Lykke.Service.SellOutEngine.DomainServices
             builder.RegisterType<OrderBookService>()
                 .As<IOrderBookService>()
                 .SingleInstance();
-            
+
             builder.RegisterType<QuoteService>()
                 .As<IQuoteService>()
                 .SingleInstance();
@@ -69,7 +69,16 @@ namespace Lykke.Service.SellOutEngine.DomainServices
                 .As<ITradeService>()
                 .SingleInstance();
 
+            builder.RegisterType<MarketMakerService>()
+                .As<IMarketMakerService>()
+                .SingleInstance();
+
+
             builder.RegisterType<BalancesTimer>()
+                .AsSelf()
+                .SingleInstance();
+
+            builder.RegisterType<MarketMakerTimer>()
                 .AsSelf()
                 .SingleInstance();
         }

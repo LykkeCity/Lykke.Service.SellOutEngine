@@ -144,6 +144,7 @@ namespace Lykke.Service.SellOutEngine.Rabbit.Subscribers
                     Id = trade.TradeId,
                     AssetPairId = limitOrder.AssetPairId,
                     ExchangeOrderId = limitOrder.Id,
+                    LimitOrderId = limitOrder.ExternalId,
                     Type = tradeType,
                     Time = trade.Timestamp,
                     Price = (decimal) trade.Price,

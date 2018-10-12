@@ -27,10 +27,10 @@ namespace Lykke.Service.SellOutEngine.AzureRepositories.Trades
         public async Task<IReadOnlyCollection<Trade>> GetAsync(DateTime startDate, DateTime endDate, int limit)
         {
             string filter = TableQuery.CombineFilters(
-                TableQuery.GenerateFilterCondition(nameof(TradeEntity.RowKey), QueryComparisons.GreaterThan,
+                TableQuery.GenerateFilterCondition(nameof(ITableEntity.PartitionKey), QueryComparisons.GreaterThan,
                     GetPartitionKey(endDate.Date.AddDays(1))),
                 TableOperators.And,
-                TableQuery.GenerateFilterCondition(nameof(TradeEntity.RowKey), QueryComparisons.LessThan,
+                TableQuery.GenerateFilterCondition(nameof(ITableEntity.PartitionKey), QueryComparisons.LessThan,
                     GetPartitionKey(startDate.Date.AddMilliseconds(-1))));
 
             var query = new TableQuery<TradeEntity>().Where(filter).Take(limit);

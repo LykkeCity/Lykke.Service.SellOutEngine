@@ -44,7 +44,10 @@ namespace Lykke.Service.SellOutEngine.Domain
 
         public void ApplyTrade(Trade trade)
         {
-            MinPrice = Math.Min(MinPrice, trade.Price);
+            if (MinPrice == decimal.Zero)
+                MinPrice = trade.Price;
+            else
+                MinPrice = Math.Min(MinPrice, trade.Price);
 
             MaxPrice = Math.Max(MaxPrice, trade.Price);
 

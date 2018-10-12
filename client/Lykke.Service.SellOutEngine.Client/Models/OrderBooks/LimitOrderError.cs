@@ -19,9 +19,19 @@ namespace Lykke.Service.SellOutEngine.Client.Models.OrderBooks
         Unknown,
 
         /// <summary>
+        /// Indicates that an instrument is not allowed to create limit orders on exchange.
+        /// </summary>
+        Idle,
+
+        /// <summary>
         /// Indicates that the current quota is exceeded allowed timeout.
         /// </summary>
         InvalidQuote,
+
+        /// <summary>
+        /// Indicates that the current balance is too low.
+        /// </summary>
+        LowBalance,
 
         /// <summary>
         /// Indicates that the current order book has not liquidity.

@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using JetBrains.Annotations;
 using Lykke.Service.SellOutEngine.Client.Models.Settings;
@@ -18,6 +19,13 @@ namespace Lykke.Service.SellOutEngine.Client.Api
         [Get("/api/settings/account")]
         Task<AccountSettingsModel> GetAccountSettingsAsync();
 
+        /// <summary>
+        /// Returns a collection of quote sources.
+        /// </summary>
+        /// <returns>A collection of quote sources.</returns>
+        [Get("/api/settings/quotesources")]
+        Task<IReadOnlyCollection<string>> GetQuoteSourcesAsync();
+        
         /// <summary>
         /// Returns settings of service timers.
         /// </summary>

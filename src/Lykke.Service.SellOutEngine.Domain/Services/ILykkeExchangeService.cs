@@ -6,5 +6,7 @@ namespace Lykke.Service.SellOutEngine.Domain.Services
     public interface ILykkeExchangeService
     {
         Task ApplyAsync(string assetPairId, IReadOnlyCollection<LimitOrder> limitOrders);
+
+        Task CancelAsync(string assetPairId);
     }
 }

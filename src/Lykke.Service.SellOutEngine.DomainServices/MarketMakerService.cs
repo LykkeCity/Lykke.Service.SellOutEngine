@@ -92,7 +92,16 @@ namespace Lykke.Service.SellOutEngine.DomainServices
                 .Where(o => o.Error == LimitOrderError.None)
                 .ToArray();
 
-            await _lykkeExchangeService.ApplyAsync(instrument.AssetPairId, limitOrders);
+            try
+            {
+                await _lykkeExchangeService.ApplyAsync(instrument.AssetPairId, limitOrders);
+            }
+            catch (Exception exception)
+            {
+                _log.WarningWithDetails("An error occurred while processing limit orders", exception, limitOrders);
+
+                SetError(limitOrders, LimitOrderError.Unknown, "ME error");
+            }
         }
 
         private async Task ValidateQuoteAsync(IReadOnlyCollection<LimitOrder> limitOrders, Quote quote)
@@ -120,10 +129,14 @@ namespace Lykke.Service.SellOutEngine.DomainServices
             }
         }
 
-        private void SetError(IReadOnlyCollection<LimitOrder> limitOrders, LimitOrderError limitOrderError)
+        private void SetError(IReadOnlyCollection<LimitOrder> limitOrders, LimitOrderError limitOrderError,
+            string errorMessage = null)
         {
             foreach (LimitOrder limitOrder in limitOrders.Where(o => o.Error == LimitOrderError.None))
+            {
                 limitOrder.Error = limitOrderError;
+                limitOrder.ErrorMessage = errorMessage;
+            }
         }
     }
 }

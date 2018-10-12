@@ -118,5 +118,10 @@ namespace Lykke.Service.SellOutEngine.DomainServices.Exchanges
 
             _log.InfoWithDetails("ME place multi limit order response", response);
         }
+
+        public Task CancelAsync(string assetPairId)
+        {
+            return ApplyAsync(assetPairId, new LimitOrder[0]);
+        }
     }
 }

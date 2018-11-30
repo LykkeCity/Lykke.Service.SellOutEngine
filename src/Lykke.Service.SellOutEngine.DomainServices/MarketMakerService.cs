@@ -59,7 +59,7 @@ namespace Lykke.Service.SellOutEngine.DomainServices
 
         private async Task ProcessInstrumentAsync(Instrument instrument)
         {
-            Quote quote = await _quoteService.GetAsync(instrument.QuoteSource, instrument.AssetPairId);
+            Quote quote = _quoteService.Get(instrument.QuoteSource, instrument.AssetPairId);
 
             if (quote == null)
             {

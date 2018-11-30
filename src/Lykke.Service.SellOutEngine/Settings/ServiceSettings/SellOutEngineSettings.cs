@@ -12,8 +12,6 @@ namespace Lykke.Service.SellOutEngine.Settings.ServiceSettings
 
         public TimeSpan AssetsCacheExpirationPeriod { get; set; }
 
-        public string[] QuoteSources { get; set; }
-
         public DbSettings Db { get; set; }
 
         public RabbitSettings Rabbit { get; set; }

@@ -56,8 +56,10 @@ namespace Lykke.Service.SellOutEngine.Rabbit.Subscribers
 
         private Task ProcessMessageAsync(TickPrice tickPrice)
         {
-            return _quoteService.SetAsync(new Quote(tickPrice.Asset, tickPrice.Timestamp, tickPrice.Ask, tickPrice.Bid,
+            _quoteService.Set(new Quote(tickPrice.Asset, tickPrice.Timestamp, tickPrice.Ask, tickPrice.Bid,
                 tickPrice.Source));
+
+            return Task.CompletedTask;
         }
     }
 }

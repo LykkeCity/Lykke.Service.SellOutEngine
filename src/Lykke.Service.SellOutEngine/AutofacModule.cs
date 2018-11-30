@@ -25,9 +25,8 @@ namespace Lykke.Service.SellOutEngine
 
         protected override void Load(ContainerBuilder builder)
         {
-            builder.RegisterModule(new DomainServices.AutofacModule(
-                _settings.CurrentValue.SellOutEngineService.WalletId,
-                _settings.CurrentValue.SellOutEngineService.QuoteSources));
+            builder.RegisterModule(
+                new DomainServices.AutofacModule(_settings.CurrentValue.SellOutEngineService.WalletId));
             builder.RegisterModule(new AzureRepositories.AutofacModule(
                 _settings.Nested(o => o.SellOutEngineService.Db.DataConnectionString),
                 _settings.Nested(o => o.SellOutEngineService.Db.LykkeTradesMeQueuesDeduplicatorConnectionString)));

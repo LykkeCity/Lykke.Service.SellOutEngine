@@ -22,7 +22,7 @@ namespace Lykke.Service.SellOutEngine.DomainServices.Instruments
         private readonly IBalanceService _balanceService;
         private readonly IAssetsReadModelRepository _assetsReadModelRepository;
         private readonly IAssetPairsReadModelRepository _assetPairsReadModelRepository;
-        private readonly ISettingsService _settingsService;
+        private readonly IQuoteService _quoteService;
         private readonly InMemoryCache<Instrument> _cache;
         private readonly ILog _log;
 
@@ -33,7 +33,7 @@ namespace Lykke.Service.SellOutEngine.DomainServices.Instruments
             IBalanceService balanceService,
             IAssetsReadModelRepository assetsReadModelRepository,
             IAssetPairsReadModelRepository assetPairsReadModelRepository,
-            ISettingsService settingsService,
+            IQuoteService quoteService,
             ILogFactory logFactory)
         {
             _instrumentRepository = instrumentRepository;
@@ -42,7 +42,7 @@ namespace Lykke.Service.SellOutEngine.DomainServices.Instruments
             _balanceService = balanceService;
             _assetsReadModelRepository = assetsReadModelRepository;
             _assetPairsReadModelRepository = assetPairsReadModelRepository;
-            _settingsService = settingsService;
+            _quoteService = quoteService;
             _cache = new InMemoryCache<Instrument>(instrument => instrument.AssetPairId, false);
             _log = logFactory.CreateLog(this);
         }
@@ -86,7 +86,7 @@ namespace Lykke.Service.SellOutEngine.DomainServices.Instruments
 
         public async Task CreateMissedAsync(string userId)
         {
-            IReadOnlyCollection<string> sources = await _settingsService.GetQuoteSourcesAsync();
+            string source = _quoteService.GetSources().FirstOrDefault();
             
             IReadOnlyCollection<Balance> balances = await _balanceService.GetAsync();
 
@@ -116,7 +116,7 @@ namespace Lykke.Service.SellOutEngine.DomainServices.Instruments
                 instrument = new Instrument
                 {
                     AssetPairId = assetPair.Id,
-                    QuoteSource = sources.FirstOrDefault(),
+                    QuoteSource = source,
                     Markup = 0,
                     Levels = 1,
                     MinSpread = .2m,

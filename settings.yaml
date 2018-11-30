@@ -2,11 +2,6 @@ SellOutEngineService:
   WalletId:
     settings-key: SellOutEngineService-WalletId
 
-  QuoteSources:
-    settings-key: SellOutEngineService-QuoteSources
-    types:
-    - JsonArray
-
   Db:
     DataConnectionString:
       settings-key: SellOutEngineService-DataConnectionString

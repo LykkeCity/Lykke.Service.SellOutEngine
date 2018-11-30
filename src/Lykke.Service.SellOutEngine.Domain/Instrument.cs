@@ -36,6 +36,11 @@ namespace Lykke.Service.SellOutEngine.Domain
         /// The mode of the instrument.
         /// </summary>
         public InstrumentMode Mode { get; set; }
+        
+        /// <summary>
+        /// Indicates that the instrument was approved after auto creation.
+        /// </summary>
+        public bool IsApproved { get; set; }
 
         public void Update(Instrument instrument)
         {
@@ -45,6 +50,11 @@ namespace Lykke.Service.SellOutEngine.Domain
             MinSpread = instrument.MinSpread;
             MaxSpread = instrument.MaxSpread;
             Mode = instrument.Mode;
+        }
+
+        public void Approve()
+        {
+            IsApproved = true;
         }
     }
 }

@@ -45,5 +45,10 @@ namespace Lykke.Service.SellOutEngine.Client.Models.Instruments
         /// </summary>
         [JsonConverter(typeof(StringEnumConverter))]
         public InstrumentMode Mode { get; set; }
+        
+        /// <summary>
+        /// Indicates that the instrument was approved after auto creation.
+        /// </summary>
+        public bool IsApproved { get; set; }
     }
 }

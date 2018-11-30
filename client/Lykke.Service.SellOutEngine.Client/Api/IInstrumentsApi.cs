@@ -36,6 +36,13 @@ namespace Lykke.Service.SellOutEngine.Client.Api
         Task AddAsync([Body] InstrumentModel model, string userId);
 
         /// <summary>
+        /// Creates missed instruments.
+        /// </summary>
+        /// <param name="userId">The identifier of the user that execute the operation.</param>
+        [Post("/api/instruments/missed")]
+        Task CreateMissedAsync(string userId);
+        
+        /// <summary>
         /// Updates existing instrument.
         /// </summary>
         /// <param name="model">The model that describes instrument.</param>

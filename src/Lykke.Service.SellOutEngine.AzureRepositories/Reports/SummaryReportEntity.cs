@@ -36,7 +36,7 @@ namespace Lykke.Service.SellOutEngine.AzureRepositories.Reports
                 if (_minPrice != value)
                 {
                     _minPrice = value;
-                    MarkValueTypePropertyAsDirty("MinPrice");
+                    MarkValueTypePropertyAsDirty();
                 }
             }
         }
@@ -49,7 +49,7 @@ namespace Lykke.Service.SellOutEngine.AzureRepositories.Reports
                 if (_maxPrice != value)
                 {
                     _maxPrice = value;
-                    MarkValueTypePropertyAsDirty("MaxPrice");
+                    MarkValueTypePropertyAsDirty();
                 }
             }
         }
@@ -62,7 +62,7 @@ namespace Lykke.Service.SellOutEngine.AzureRepositories.Reports
                 if (_avgPrice != value)
                 {
                     _avgPrice = value;
-                    MarkValueTypePropertyAsDirty("AvgPrice");
+                    MarkValueTypePropertyAsDirty();
                 }
             }
         }
@@ -75,7 +75,7 @@ namespace Lykke.Service.SellOutEngine.AzureRepositories.Reports
                 if (_totalSellBaseAssetVolume != value)
                 {
                     _totalSellBaseAssetVolume = value;
-                    MarkValueTypePropertyAsDirty("TotalSellBaseAssetVolume");
+                    MarkValueTypePropertyAsDirty();
                 }
             }
         }
@@ -88,7 +88,7 @@ namespace Lykke.Service.SellOutEngine.AzureRepositories.Reports
                 if (_totalBuyQuoteAssetVolume != value)
                 {
                     _totalBuyQuoteAssetVolume = value;
-                    MarkValueTypePropertyAsDirty("TotalBuyQuoteAssetVolume");
+                    MarkValueTypePropertyAsDirty();
                 }
             }
         }
@@ -101,7 +101,7 @@ namespace Lykke.Service.SellOutEngine.AzureRepositories.Reports
                 if (_sellTradesCount != value)
                 {
                     _sellTradesCount = value;
-                    MarkValueTypePropertyAsDirty("SellTradesCount");
+                    MarkValueTypePropertyAsDirty();
                 }
             }
         }

@@ -11,6 +11,8 @@ namespace Lykke.Service.SellOutEngine.Domain.Services
 
         Task AddAsync(Instrument instrument, string userId);
 
+        Task CreateMissedAsync(string userId);
+        
         Task UpdateAsync(Instrument instrument, string userId);
 
         Task DeleteAsync(string assetPairId, string userId);

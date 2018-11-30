@@ -44,7 +44,7 @@ namespace Lykke.Service.SellOutEngine.AzureRepositories.Trades
                 if (_type != value)
                 {
                     _type = value;
-                    MarkValueTypePropertyAsDirty("Type");
+                    MarkValueTypePropertyAsDirty();
                 }
             }
         }
@@ -57,7 +57,7 @@ namespace Lykke.Service.SellOutEngine.AzureRepositories.Trades
                 if (_time != value)
                 {
                     _time = value;
-                    MarkValueTypePropertyAsDirty("Time");
+                    MarkValueTypePropertyAsDirty();
                 }
             }
         }
@@ -70,7 +70,7 @@ namespace Lykke.Service.SellOutEngine.AzureRepositories.Trades
                 if (_price != value)
                 {
                     _price = value;
-                    MarkValueTypePropertyAsDirty("Price");
+                    MarkValueTypePropertyAsDirty();
                 }
             }
         }
@@ -83,7 +83,7 @@ namespace Lykke.Service.SellOutEngine.AzureRepositories.Trades
                 if (_volume != value)
                 {
                     _volume = value;
-                    MarkValueTypePropertyAsDirty("Volume");
+                    MarkValueTypePropertyAsDirty();
                 }
             }
         }
@@ -96,7 +96,7 @@ namespace Lykke.Service.SellOutEngine.AzureRepositories.Trades
                 if (_remainingVolume != value)
                 {
                     _remainingVolume = value;
-                    MarkValueTypePropertyAsDirty("RemainingVolume");
+                    MarkValueTypePropertyAsDirty();
                 }
             }
         }
@@ -109,7 +109,7 @@ namespace Lykke.Service.SellOutEngine.AzureRepositories.Trades
                 if (_oppositeVolume != value)
                 {
                     _oppositeVolume = value;
-                    MarkValueTypePropertyAsDirty("OppositeVolume");
+                    MarkValueTypePropertyAsDirty();
                 }
             }
         }

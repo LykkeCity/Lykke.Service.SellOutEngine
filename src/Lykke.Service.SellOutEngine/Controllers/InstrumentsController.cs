@@ -79,6 +79,19 @@ namespace Lykke.Service.SellOutEngine.Controllers
         }
 
         /// <inheritdoc/>
+        /// <response code="204">The operation successfully completed.</response>
+        [HttpPost("missed")]
+        [ProducesResponseType((int) HttpStatusCode.NoContent)]
+        [ProducesResponseType(typeof(ErrorResponse), (int) HttpStatusCode.Conflict)]
+        public async Task CreateMissedAsync(string userId)
+        {
+            if (string.IsNullOrEmpty(userId))
+                throw new ValidationApiException("Used id required");
+
+            await _instrumentService.CreateMissedAsync(userId);
+        }
+        
+        /// <inheritdoc/>
         /// <response code="204">The instrument successfully updated.</response>
         /// <response code="404">Instrument does not exist.</response>
         [HttpPut]

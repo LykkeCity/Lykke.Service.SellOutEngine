@@ -51,6 +51,7 @@ namespace Lykke.Service.SellOutEngine.DomainServices
             IReadOnlyCollection<Instrument> instruments = await _instrumentService.GetAllAsync();
 
             IReadOnlyCollection<Instrument> activeInstruments = instruments
+                .Where(o => o.IsApproved)
                 .Where(o => o.Mode == InstrumentMode.Idle || o.Mode == InstrumentMode.Active)
                 .ToArray();
 

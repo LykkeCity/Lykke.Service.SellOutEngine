@@ -1,4 +1,3 @@
-using System;
 using System.Net;
 using Autofac;
 using JetBrains.Annotations;
@@ -30,7 +29,8 @@ namespace Lykke.Service.SellOutEngine
                 _settings.CurrentValue.SellOutEngineService.WalletId,
                 _settings.CurrentValue.SellOutEngineService.QuoteSources));
             builder.RegisterModule(new AzureRepositories.AutofacModule(
-                _settings.Nested(o => o.SellOutEngineService.Db.DataConnectionString)));
+                _settings.Nested(o => o.SellOutEngineService.Db.DataConnectionString),
+                _settings.Nested(o => o.SellOutEngineService.Db.LykkeTradesMeQueuesDeduplicatorConnectionString)));
 
             builder.RegisterType<StartupManager>()
                 .As<IStartupManager>();
@@ -45,9 +45,7 @@ namespace Lykke.Service.SellOutEngine
 
         private void RegisterClients(ContainerBuilder builder)
         {
-            builder.RegisterAssetsClient(AssetServiceSettings.Create(
-                new Uri(_settings.CurrentValue.AssetsServiceClient.ServiceUrl),
-                _settings.CurrentValue.SellOutEngineService.AssetsCacheExpirationPeriod));
+            builder.RegisterAssetsClient(_settings.CurrentValue.AssetsServiceClient);
 
             builder.RegisterBalancesClient(_settings.CurrentValue.BalancesServiceClient);
 

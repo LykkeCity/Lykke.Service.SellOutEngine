@@ -3,6 +3,8 @@ using AzureStorage.Tables;
 using AzureStorage.Tables.Templates.Index;
 using JetBrains.Annotations;
 using Lykke.Common.Log;
+using Lykke.RabbitMq.Azure.Deduplicator;
+using Lykke.RabbitMqBroker.Deduplication;
 using Lykke.Service.SellOutEngine.AzureRepositories.Instruments;
 using Lykke.Service.SellOutEngine.AzureRepositories.Reports;
 using Lykke.Service.SellOutEngine.AzureRepositories.Settings;
@@ -16,10 +18,14 @@ namespace Lykke.Service.SellOutEngine.AzureRepositories
     public class AutofacModule : Module
     {
         private readonly IReloadingManager<string> _connectionString;
+        private readonly IReloadingManager<string> _lykkeTradesDeduplicatorConnectionString;
 
-        public AutofacModule(IReloadingManager<string> connectionString)
+        public AutofacModule(
+            IReloadingManager<string> connectionString,
+            IReloadingManager<string> lykkeTradesDeduplicatorConnectionString)
         {
             _connectionString = connectionString;
+            _lykkeTradesDeduplicatorConnectionString = lykkeTradesDeduplicatorConnectionString;
         }
 
         protected override void Load(ContainerBuilder builder)
@@ -54,6 +60,12 @@ namespace Lykke.Service.SellOutEngine.AzureRepositories
                     AzureTableStorage<AzureIndex>.Create(_connectionString,
                         "InternalTradesIndices", container.Resolve<ILogFactory>())))
                 .As<ITradeRepository>()
+                .SingleInstance();
+
+            builder.Register(container => new AzureStorageDeduplicator(
+                    AzureTableStorage<DuplicateEntity>.Create(_lykkeTradesDeduplicatorConnectionString,
+                        "LykkeTradesDeduplicator", container.Resolve<ILogFactory>())))
+                .As<IDeduplicator>()
                 .SingleInstance();
         }
     }

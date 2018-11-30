@@ -2,17 +2,20 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Common;
 using Common.Log;
 using JetBrains.Annotations;
 using Lykke.Common.Log;
-using Lykke.MatchingEngine.Connector.Models.Common;
-using Lykke.MatchingEngine.Connector.Models.RabbitMq;
+using Lykke.MatchingEngine.Connector.Models.Events;
+using Lykke.MatchingEngine.Connector.Models.Events.Common;
 using Lykke.RabbitMqBroker;
+using Lykke.RabbitMqBroker.Deduplication;
 using Lykke.RabbitMqBroker.Subscriber;
 using Lykke.Service.SellOutEngine.Domain;
 using Lykke.Service.SellOutEngine.Domain.Extensions;
 using Lykke.Service.SellOutEngine.Domain.Services;
 using Lykke.Service.SellOutEngine.Settings.ServiceSettings.Rabbit.Subscribers;
+using Trade = Lykke.Service.SellOutEngine.Domain.Trade;
 
 namespace Lykke.Service.SellOutEngine.Rabbit.Subscribers
 {
@@ -23,22 +26,25 @@ namespace Lykke.Service.SellOutEngine.Rabbit.Subscribers
         private readonly ISettingsService _settingsService;
         private readonly ITradeService _tradeService;
         private readonly ISummaryReportService _summaryReportService;
+        private readonly IDeduplicator _deduplicator;
         private readonly ILogFactory _logFactory;
         private readonly ILog _log;
 
-        private RabbitMqSubscriber<LimitOrders> _subscriber;
+        private IStopable _subscriber;
 
         public LykkeTradeSubscriber(
             SubscriberSettings settings,
             ISettingsService settingsService,
             ITradeService tradeService,
             ISummaryReportService summaryReportService,
+            IDeduplicator deduplicator,
             ILogFactory logFactory)
         {
             _settings = settings;
             _settingsService = settingsService;
             _tradeService = tradeService;
             _summaryReportService = summaryReportService;
+            _deduplicator = deduplicator;
             _logFactory = logFactory;
             _log = logFactory.CreateLog(this);
         }
@@ -46,17 +52,20 @@ namespace Lykke.Service.SellOutEngine.Rabbit.Subscribers
         public void Start()
         {
             var settings = RabbitMqSubscriptionSettings
-                .CreateForSubscriber(_settings.ConnectionString, _settings.Exchange, _settings.Queue)
+                .ForSubscriber(_settings.ConnectionString, _settings.Exchange, _settings.Queue)
+                .UseRoutingKey(((int) MessageType.Order).ToString())
                 .MakeDurable();
 
-            settings.DeadLetterExchangeName = null;
-
-            _subscriber = new RabbitMqSubscriber<LimitOrders>(_logFactory, settings,
-                    new ResilientErrorHandlingStrategy(_logFactory, settings, TimeSpan.FromSeconds(10)))
-                .SetMessageDeserializer(new JsonMessageDeserializer<LimitOrders>())
+            _subscriber = new RabbitMqSubscriber<ExecutionEvent>(
+                    _logFactory, settings, new ResilientErrorHandlingStrategy(_logFactory, settings,
+                        TimeSpan.FromSeconds(10),
+                        next: new DeadQueueErrorHandlingStrategy(_logFactory, settings)))
+                .SetMessageDeserializer(new ProtobufMessageDeserializer<ExecutionEvent>())
                 .SetMessageReadStrategy(new MessageReadQueueStrategy())
                 .Subscribe(ProcessMessageAsync)
                 .CreateDefaultBinding()
+                .SetAlternativeExchange(_settings.AlternateConnectionString)
+                .SetDeduplicator(_deduplicator)
                 .Start();
         }
 
@@ -70,23 +79,34 @@ namespace Lykke.Service.SellOutEngine.Rabbit.Subscribers
             _subscriber?.Dispose();
         }
 
-        private async Task ProcessMessageAsync(LimitOrders limitOrders)
+        private async Task ProcessMessageAsync(ExecutionEvent message)
         {
+            if (message.Header.MessageType != MessageType.Order)
+                return;
+
             try
             {
-                if (limitOrders.Orders == null || limitOrders.Orders.Count == 0)
-                    return;
-
                 string walletId = await _settingsService.GetWalletIdAsync();
 
-                if (string.IsNullOrEmpty(walletId))
-                    return;
+                Order[] orders = message.Orders
+                    .Where(o => o.WalletId == walletId)
+                    .Where(o => o.Side != OrderSide.UnknownOrderSide)
+                    .Where(o => o.Trades?.Count > 0)
+                    .ToArray();
 
-                IEnumerable<LimitOrderWithTrades> clientLimitOrders = limitOrders.Orders
-                    .Where(o => o.Order?.ClientId == walletId)
-                    .Where(o => o.Trades?.Count > 0);
+                var trades = new List<Trade>();
 
-                IReadOnlyCollection<Trade> trades = GetTrades(clientLimitOrders);
+                foreach (Order order in orders)
+                {
+                    if (order.Status == OrderStatus.Matched ||
+                        order.Status == OrderStatus.PartiallyMatched ||
+                        order.Status == OrderStatus.Cancelled)
+                    {
+                        IReadOnlyList<Trade> orderExecutionReports = GetTrades(order);
+
+                        trades.AddRange(orderExecutionReports);
+                    }
+                }
 
                 if (trades.Any())
                 {
@@ -96,67 +116,40 @@ namespace Lykke.Service.SellOutEngine.Rabbit.Subscribers
                         await _summaryReportService.RegisterTradeAsync(trade);
                     }
 
-                    _log.InfoWithDetails("Traders were handled", clientLimitOrders);
+                    _log.InfoWithDetails("Traders were handled", trades);
                 }
             }
             catch (Exception exception)
             {
-                _log.Error(exception, "An error occurred during processing trades", limitOrders);
+                _log.Error(exception, "An error occurred during processing trades", message);
             }
         }
 
-        private static IReadOnlyCollection<Trade> GetTrades(IEnumerable<LimitOrderWithTrades> limitOrders)
-        {
-            var executionReports = new List<Trade>();
-
-            foreach (LimitOrderWithTrades limitOrderModel in limitOrders)
-            {
-                if (limitOrderModel.Order.Status == OrderStatus.Matched ||
-                    limitOrderModel.Order.Status == OrderStatus.Processing ||
-                    limitOrderModel.Order.Status == OrderStatus.Cancelled)
-                {
-                    IReadOnlyList<Trade> orderExecutionReports =
-                        GetTrades(limitOrderModel.Order, limitOrderModel.Trades);
-
-                    executionReports.AddRange(orderExecutionReports);
-                }
-            }
-
-            return executionReports;
-        }
-
-        private static IReadOnlyList<Trade> GetTrades(
-            MatchingEngine.Connector.Models.RabbitMq.LimitOrder limitOrder,
-            IReadOnlyList<LimitTradeInfo> trades)
+        private static IReadOnlyList<Trade> GetTrades(Order order)
         {
             var reports = new List<Trade>();
 
-            for (int i = 0; i < trades.Count; i++)
+            for (int i = 0; i < order.Trades.Count; i++)
             {
-                LimitTradeInfo trade = trades[i];
+                Lykke.MatchingEngine.Connector.Models.Events.Trade trade = order.Trades[i];
 
-                TradeType tradeType = limitOrder.Volume < 0
+                TradeType tradeType = order.Side == OrderSide.Sell
                     ? TradeType.Sell
                     : TradeType.Buy;
 
                 reports.Add(new Trade
                 {
                     Id = trade.TradeId,
-                    AssetPairId = limitOrder.AssetPairId,
-                    ExchangeOrderId = limitOrder.Id,
-                    LimitOrderId = limitOrder.ExternalId,
+                    AssetPairId = order.AssetPairId,
+                    ExchangeOrderId = order.Id,
+                    LimitOrderId = order.ExternalId,
                     Type = tradeType,
                     Time = trade.Timestamp,
-                    Price = (decimal) trade.Price,
-                    Volume = tradeType == TradeType.Buy
-                        ? (decimal) trade.OppositeVolume
-                        : (decimal) trade.Volume,
-                    OppositeClientId = trade.OppositeClientId,
+                    Price = decimal.Parse(trade.Price),
+                    Volume = Math.Abs(decimal.Parse(trade.BaseVolume)),
+                    OppositeClientId = trade.OppositeWalletId,
                     OppositeLimitOrderId = trade.OppositeOrderId,
-                    OppositeVolume = tradeType == TradeType.Buy
-                        ? (decimal) trade.Volume
-                        : (decimal) trade.OppositeVolume,
-                    RemainingVolume = (decimal) limitOrder.RemainingVolume
+                    OppositeVolume = Math.Abs(decimal.Parse(trade.QuotingVolume))
                 });
             }
 

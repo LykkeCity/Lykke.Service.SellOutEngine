@@ -30,7 +30,7 @@ SellOutEngineService:
           types:
           - RabbitMq
         Exchange:
-          settings-key: SellOutEngineService-Rabbit-Subscribers-LykkeTrades-Exchange
+          settings-key: MatchingEngineSpotEventsExchange
         Queue:
           settings-key: SellOutEngineService-Rabbit-Subscribers-Queue
 

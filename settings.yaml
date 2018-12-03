@@ -2,13 +2,6 @@ SellOutEngineService:
   WalletId:
     settings-key: SellOutEngineService-WalletId
 
-  AssetsCacheExpirationPeriod: 00:10:00
-
-  QuoteSources:
-    settings-key: SellOutEngineService-QuoteSources
-    types:
-    - JsonArray
-
   Db:
     DataConnectionString:
       settings-key: SellOutEngineService-DataConnectionString
@@ -19,22 +12,31 @@ SellOutEngineService:
       settings-key: SellOutEngineService-LogsConnectionString
       types:
       - AzureTableStorage
+      
+    LykkeTradesMeQueuesDeduplicatorConnectionString:
+      settings-key: SellOutEngineService-LykkeTradesMeQueuesDeduplicatorConnectionString
+      types:
+      - AzureTableStorage
 
   Rabbit:
     Subscribers:
       LykkeTrades:
         ConnectionString:
-          settings-key: SellOutEngineService-Rabbit-Subscribers-LykkeTrades-ConnectionString
+          settings-key: MatchingEngineRabbitMqConnectionString
+          types:
+          - RabbitMq
+        AlternateConnectionString:
+          settings-key: AlternateMatchingEngineRabbitMqConnectionString
           types:
           - RabbitMq
         Exchange:
-          settings-key: SellOutEngineService-Rabbit-Subscribers-LykkeTrades-Exchange
+          settings-key: MatchingEngineSpotEventsExchange
         Queue:
-          settings-key: SellOutEngineService-Rabbit-Subscribers-LykkeTrades-Queue
+          settings-key: SellOutEngineService-Rabbit-Subscribers-Queue
 
       Quotes:
         ConnectionString:
-          settings-key: SellOutEngineService-Rabbit-Subscribers-Quotes-ConnectionString
+          settings-key: RawPriceRabbitMq
           types:
           - RabbitMq
         Exchanges:
@@ -42,7 +44,7 @@ SellOutEngineService:
           types:
           - JsonArray
         Queue:
-          settings-key: SellOutEngineService-Rabbit-Subscribers-Quotes-Queue
+          settings-key: SellOutEngineService-Rabbit-Subscribers-Queue
 
 AssetsServiceClient:
   ServiceUrl:

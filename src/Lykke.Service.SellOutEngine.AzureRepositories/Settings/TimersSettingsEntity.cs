@@ -31,7 +31,7 @@ namespace Lykke.Service.SellOutEngine.AzureRepositories.Settings
                 if (_marketMaker != value)
                 {
                     _marketMaker = value;
-                    MarkValueTypePropertyAsDirty("MarketMaker");
+                    MarkValueTypePropertyAsDirty();
                 }
             }
         }
@@ -44,7 +44,7 @@ namespace Lykke.Service.SellOutEngine.AzureRepositories.Settings
                 if (_balances != value)
                 {
                     _balances = value;
-                    MarkValueTypePropertyAsDirty("Balances");
+                    MarkValueTypePropertyAsDirty();
                 }
             }
         }

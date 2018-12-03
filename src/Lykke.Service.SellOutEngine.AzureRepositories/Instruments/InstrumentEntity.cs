@@ -15,6 +15,7 @@ namespace Lykke.Service.SellOutEngine.AzureRepositories.Instruments
         private decimal _minSpread;
         private decimal _maxSpread;
         private InstrumentMode _mode;
+        private bool _isApproved;
 
         public InstrumentEntity()
         {
@@ -38,7 +39,7 @@ namespace Lykke.Service.SellOutEngine.AzureRepositories.Instruments
                 if (_markup != value)
                 {
                     _markup = value;
-                    MarkValueTypePropertyAsDirty("Markup");
+                    MarkValueTypePropertyAsDirty();
                 }
             }
         }
@@ -51,7 +52,7 @@ namespace Lykke.Service.SellOutEngine.AzureRepositories.Instruments
                 if (_levels != value)
                 {
                     _levels = value;
-                    MarkValueTypePropertyAsDirty("Levels");
+                    MarkValueTypePropertyAsDirty();
                 }
             }
         }
@@ -64,7 +65,7 @@ namespace Lykke.Service.SellOutEngine.AzureRepositories.Instruments
                 if (_minSpread != value)
                 {
                     _minSpread = value;
-                    MarkValueTypePropertyAsDirty("MinSpread");
+                    MarkValueTypePropertyAsDirty();
                 }
             }
         }
@@ -77,7 +78,7 @@ namespace Lykke.Service.SellOutEngine.AzureRepositories.Instruments
                 if (_maxSpread != value)
                 {
                     _maxSpread = value;
-                    MarkValueTypePropertyAsDirty("MaxSpread");
+                    MarkValueTypePropertyAsDirty();
                 }
             }
         }
@@ -90,7 +91,20 @@ namespace Lykke.Service.SellOutEngine.AzureRepositories.Instruments
                 if (_mode != value)
                 {
                     _mode = value;
-                    MarkValueTypePropertyAsDirty("Mode");
+                    MarkValueTypePropertyAsDirty();
+                }
+            }
+        }
+
+        public bool IsApproved
+        {
+            get => _isApproved;
+            set
+            {
+                if (_isApproved != value)
+                {
+                    _isApproved = value;
+                    MarkValueTypePropertyAsDirty();
                 }
             }
         }

@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using Autofac;
 using JetBrains.Annotations;
 using Lykke.Service.SellOutEngine.Domain.Services;
@@ -17,12 +16,10 @@ namespace Lykke.Service.SellOutEngine.DomainServices
     public class AutofacModule : Module
     {
         private readonly string _walletId;
-        private readonly IReadOnlyCollection<string> _quoteSources;
 
-        public AutofacModule(string walletId, IReadOnlyCollection<string> quoteSources)
+        public AutofacModule(string walletId)
         {
             _walletId = walletId;
-            _quoteSources = quoteSources;
         }
 
         protected override void Load(ContainerBuilder builder)
@@ -54,7 +51,6 @@ namespace Lykke.Service.SellOutEngine.DomainServices
             builder.RegisterType<SettingsService>()
                 .As<ISettingsService>()
                 .WithParameter(new NamedParameter("walletId", _walletId))
-                .WithParameter(new NamedParameter("quoteSources", _quoteSources))
                 .SingleInstance();
 
             builder.RegisterType<TimersSettingsService>()

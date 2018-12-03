@@ -31,7 +31,7 @@ namespace Lykke.Service.SellOutEngine.Rabbit.Subscribers
         public void Start()
         {
             var settings = RabbitMqSubscriptionSettings
-                .CreateForSubscriber(_settings.ConnectionString, _settings.Exchange, _settings.Queue);
+                .ForSubscriber(_settings.ConnectionString, _settings.Exchange, _settings.Queue);
 
             settings.DeadLetterExchangeName = null;
 
@@ -56,8 +56,10 @@ namespace Lykke.Service.SellOutEngine.Rabbit.Subscribers
 
         private Task ProcessMessageAsync(TickPrice tickPrice)
         {
-            return _quoteService.SetAsync(new Quote(tickPrice.Asset, tickPrice.Timestamp, tickPrice.Ask, tickPrice.Bid,
+            _quoteService.Set(new Quote(tickPrice.Asset, tickPrice.Timestamp, tickPrice.Ask, tickPrice.Bid,
                 tickPrice.Source));
+
+            return Task.CompletedTask;
         }
     }
 }

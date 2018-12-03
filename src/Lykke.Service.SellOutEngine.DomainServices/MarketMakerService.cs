@@ -5,8 +5,8 @@ using System.Threading.Tasks;
 using Common.Log;
 using JetBrains.Annotations;
 using Lykke.Common.Log;
-using Lykke.Service.Assets.Client;
-using Lykke.Service.Assets.Client.Models;
+using Lykke.Service.Assets.Client.Models.v3;
+using Lykke.Service.Assets.Client.ReadModels;
 using Lykke.Service.SellOutEngine.Domain;
 using Lykke.Service.SellOutEngine.Domain.Extensions;
 using Lykke.Service.SellOutEngine.Domain.Services;
@@ -23,7 +23,7 @@ namespace Lykke.Service.SellOutEngine.DomainServices
         private readonly IOrderBookService _orderBookService;
         private readonly IBalanceService _balanceService;
         private readonly IQuoteTimeoutSettingsService _quoteTimeoutSettingsService;
-        private readonly IAssetsServiceWithCache _assetsServiceWithCache;
+        private readonly IAssetPairsReadModelRepository _assetPairsReadModelRepository;
         private readonly ILog _log;
 
         public MarketMakerService(
@@ -33,7 +33,7 @@ namespace Lykke.Service.SellOutEngine.DomainServices
             IOrderBookService orderBookService,
             IBalanceService balanceService,
             IQuoteTimeoutSettingsService quoteTimeoutSettingsService,
-            IAssetsServiceWithCache assetsServiceWithCache,
+            IAssetPairsReadModelRepository assetPairsReadModelRepository,
             ILogFactory logFactory)
         {
             _instrumentService = instrumentService;
@@ -42,7 +42,7 @@ namespace Lykke.Service.SellOutEngine.DomainServices
             _orderBookService = orderBookService;
             _balanceService = balanceService;
             _quoteTimeoutSettingsService = quoteTimeoutSettingsService;
-            _assetsServiceWithCache = assetsServiceWithCache;
+            _assetPairsReadModelRepository = assetPairsReadModelRepository;
             _log = logFactory.CreateLog(this);
         }
 
@@ -51,6 +51,7 @@ namespace Lykke.Service.SellOutEngine.DomainServices
             IReadOnlyCollection<Instrument> instruments = await _instrumentService.GetAllAsync();
 
             IReadOnlyCollection<Instrument> activeInstruments = instruments
+                .Where(o => o.IsApproved)
                 .Where(o => o.Mode == InstrumentMode.Idle || o.Mode == InstrumentMode.Active)
                 .ToArray();
 
@@ -59,7 +60,7 @@ namespace Lykke.Service.SellOutEngine.DomainServices
 
         private async Task ProcessInstrumentAsync(Instrument instrument)
         {
-            Quote quote = await _quoteService.GetAsync(instrument.QuoteSource, instrument.AssetPairId);
+            Quote quote = _quoteService.Get(instrument.QuoteSource, instrument.AssetPairId);
 
             if (quote == null)
             {
@@ -67,7 +68,13 @@ namespace Lykke.Service.SellOutEngine.DomainServices
                 return;
             }
 
-            AssetPair assetPair = await _assetsServiceWithCache.TryGetAssetPairAsync(instrument.AssetPairId);
+            AssetPair assetPair = _assetPairsReadModelRepository.TryGetIfEnabled(instrument.AssetPairId);
+
+            if (assetPair == null)
+            {
+                _log.WarningWithDetails("Asset pair not found", new {instrument.AssetPairId});
+                return;
+            }
 
             Balance balance = await _balanceService.GetByAssetIdAsync(assetPair.BaseAssetId);
 
@@ -76,7 +83,7 @@ namespace Lykke.Service.SellOutEngine.DomainServices
 
             await ValidateQuoteAsync(limitOrders, quote);
 
-            ValidateMinVolume(limitOrders, (decimal) assetPair.MinVolume);
+            ValidateMinVolume(limitOrders, assetPair.MinVolume);
 
             await _orderBookService.UpdateAsync(new OrderBook
             {

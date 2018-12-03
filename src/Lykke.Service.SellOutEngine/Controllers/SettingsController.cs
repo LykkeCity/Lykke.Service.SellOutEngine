@@ -15,15 +15,18 @@ namespace Lykke.Service.SellOutEngine.Controllers
     public class SettingsController : Controller, ISettingsApi
     {
         private readonly ISettingsService _settingsService;
+        private readonly IQuoteService _quoteService;
         private readonly ITimersSettingsService _timersSettingsService;
         private readonly IQuoteTimeoutSettingsService _quoteTimeoutSettingsService;
 
         public SettingsController(
             ISettingsService settingsService,
+            IQuoteService quoteService,
             ITimersSettingsService timersSettingsService,
             IQuoteTimeoutSettingsService quoteTimeoutSettingsService)
         {
             _settingsService = settingsService;
+            _quoteService = quoteService;
             _timersSettingsService = timersSettingsService;
             _quoteTimeoutSettingsService = quoteTimeoutSettingsService;
         }
@@ -41,9 +44,9 @@ namespace Lykke.Service.SellOutEngine.Controllers
         /// <response code="200">A collection of quote sources.</response>
         [HttpGet("quotesources")]
         [ProducesResponseType(typeof(IReadOnlyCollection<string>), (int) HttpStatusCode.OK)]
-        public async Task<IReadOnlyCollection<string>> GetQuoteSourcesAsync()
+        public Task<IReadOnlyCollection<string>> GetQuoteSourcesAsync()
         {
-            return await _settingsService.GetQuoteSourcesAsync();
+            return Task.FromResult(_quoteService.GetSources());
         }
 
         /// <response code="200">The settings of service timers.</response>
